@@ -1,6 +1,75 @@
 @import 'tailwindcss';
 
-/* O design system completo (paleta, tipografia, tokens) é definido na Etapa 2. */
+/**
+ * Design system — "Mimos da Fofinha"
+ * Identidade: romântica, elegante, madura, minimalista. Fundo escuro
+ * aveludado (aubergine/vinho), acentos em dourado champagne, tipografia
+ * serifada para momentos emocionais e sans-serif limpa para a interface.
+ */
+@theme {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Base — fundo aveludado, do mais escuro (page) ao mais claro (surface elevada) */
+  --color-ink-950: #120a16;
+  --color-ink-900: #1a0f20;
+  --color-ink-800: #241531;
+  --color-ink-700: #2f1b3f;
+  --color-ink-600: #3d2450;
+  --color-ink-500: #4f2f66;
+
+  /* Vinho — cor de marca, usada em CTAs e destaques principais */
+  --color-wine-600: #6e1f42;
+  --color-wine-500: #8c2a54;
+  --color-wine-400: #b23f6d;
+  --color-wine-300: #d1638a;
+
+  /* Dourado champagne — acento de celebração, usado com moderação */
+  --color-gold-600: #a97c3c;
+  --color-gold-500: #c79a56;
+  --color-gold-400: #ddb877;
+  --color-gold-300: #ecd4a6;
+  --color-gold-200: #f5e6c8;
+
+  /* Creme — texto sobre fundo escuro */
+  --color-cream-100: #fbf5ee;
+  --color-cream-200: #f1e6d8;
+  --color-cream-300: #dcccba;
+  --color-cream-400: #b6a89b;
+
+  /* Blush — toque afetivo pontual (corações, badges), nunca dominante */
+  --color-blush-400: #e08a9e;
+  --color-blush-300: #eaa8b8;
+
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --shadow-card: 0 20px 45px -20px rgba(8, 3, 12, 0.65);
+  --shadow-glow: 0 0 0 1px rgba(221, 184, 119, 0.12), 0 20px 50px -18px rgba(140, 42, 84, 0.55);
+
+  --animate-fade-in: fade-in 0.5s ease-out both;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
 
 html,
 body,
@@ -10,6 +79,32 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-ink-950);
+  color: var(--color-cream-100);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--color-wine-500);
+  color: var(--color-cream-100);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-500) transparent;
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-gold-300),
+    var(--color-cream-100),
+    var(--color-gold-300)
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

@@ -6,6 +6,7 @@ import { CatalogPage } from '@/pages/catalog/CatalogPage'
 import { HistoryPage } from '@/pages/history/HistoryPage'
 import { RequestsPage } from '@/pages/requests/RequestsPage'
 import { AdminPage } from '@/pages/admin/AdminPage'
+import { AppShell } from '@/components/layout/AppShell'
 
 /**
  * Rotas do app. Proteção por autenticação/role (usuária vs. administrador)
@@ -14,11 +15,16 @@ import { AdminPage } from '@/pages/admin/AdminPage'
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/onboarding', element: <OnboardingPage /> },
-  { path: '/', element: <DashboardPage /> },
-  { path: '/mimos', element: <CatalogPage /> },
-  { path: '/memorias', element: <HistoryPage /> },
-  { path: '/pedido-especial', element: <RequestsPage /> },
-  { path: '/admin', element: <AdminPage /> },
+  {
+    element: <AppShell />,
+    children: [
+      { path: '/', element: <DashboardPage /> },
+      { path: '/mimos', element: <CatalogPage /> },
+      { path: '/memorias', element: <HistoryPage /> },
+      { path: '/pedido-especial', element: <RequestsPage /> },
+      { path: '/admin', element: <AdminPage /> },
+    ],
+  },
 ])
 
 export function AppRouter() {
