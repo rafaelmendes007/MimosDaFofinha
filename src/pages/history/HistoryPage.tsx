@@ -1,12 +1,12 @@
 import { History as HistoryIcon } from 'lucide-react'
 import { Badge, Card, CardDescription, EmptyState, Spinner } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRedemptionHistory } from '@/hooks/useRedemptionHistory'
+import { useMemories } from '@/hooks/useMemories'
 import { formatFullDate } from '@/utils/formatDate'
 
 export function HistoryPage() {
   const { profile } = useAuth()
-  const { entries, isLoading } = useRedemptionHistory(profile?.id)
+  const { entries, isLoading } = useMemories(profile?.id)
 
   return (
     <div className="space-y-6">
@@ -40,21 +40,17 @@ export function HistoryPage() {
               <span className="absolute top-5 -left-[29px] size-3 rounded-full border-2 border-ink-950 bg-gold-400" />
               <Card>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{entry.treat.icon}</span>
+                  <span className="text-2xl">{entry.icon}</span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-display font-semibold text-cream-100">
-                        {entry.treat.name}
-                      </p>
+                      <p className="font-display font-semibold text-cream-100">{entry.title}</p>
                       <Badge tone="gold" className="shrink-0">
                         {entry.costCredits} {entry.costCredits === 1 ? 'crédito' : 'créditos'}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-xs text-cream-400">
-                      {formatFullDate(entry.redeemedAt)}
-                    </p>
-                    {entry.treat.description && (
-                      <CardDescription className="mt-2">{entry.treat.description}</CardDescription>
+                    <p className="mt-1 text-xs text-cream-400">{formatFullDate(entry.date)}</p>
+                    {entry.description && (
+                      <CardDescription className="mt-2">{entry.description}</CardDescription>
                     )}
                   </div>
                 </div>

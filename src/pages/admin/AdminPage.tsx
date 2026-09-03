@@ -1,12 +1,21 @@
-import { Card, CardDescription, CardTitle } from '@/components/ui'
-
-const SAMPLE_STATS = [
-  { label: 'Saldo atual', value: '5 créditos' },
-  { label: 'Mimos ativos', value: '4' },
-  { label: 'Pedidos pendentes', value: '0' },
-]
+import { useState } from 'react'
+import { EmptyState, Spinner } from '@/components/ui'
+import { AdminTabs } from '@/components/admin/AdminTabs'
+import { OverviewTab } from '@/components/admin/OverviewTab'
+import { CreditsTab } from '@/components/admin/CreditsTab'
+import { TreatsTab } from '@/components/admin/TreatsTab'
+import { RequestsTab } from '@/components/admin/RequestsTab'
+import { usePrimaryUser } from '@/hooks/usePrimaryUser'
+import { useAdminRequests } from '@/hooks/useAdminRequests'
+import type { AdminTab } from '@/components/admin/AdminTabs'
 
 export function AdminPage() {
+  const { primaryUser, isLoading } = usePrimaryUser()
+  const { requests } = useAdminRequests()
+  const [tab, setTab] = useState<AdminTab>('overview')
+
+  const pendingCount = requests.filter((request) => request.status === 'pending').length
+
   return (
     <div className="space-y-6">
       <div>
@@ -14,19 +23,30 @@ export function AdminPage() {
         <p className="text-sm text-cream-400">Visão geral para o patrocinador oficial do amor.</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        {SAMPLE_STATS.map((stat) => (
-          <Card key={stat.label}>
-            <CardDescription>{stat.label}</CardDescription>
-            <CardTitle className="mt-1 text-2xl">{stat.value}</CardTitle>
-          </Card>
-        ))}
-      </div>
+      {isLoading && (
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
+      )}
 
-      <p className="text-center text-xs text-cream-400">
-        Gestão de créditos, mimos e pedidos chega completa na Etapa 8. Este painel também
-        precisará de controle de acesso (Etapa 3) para não ficar visível a qualquer pessoa.
-      </p>
+      {!isLoading && !primaryUser && (
+        <EmptyState
+          icon="🤍"
+          title="Nenhuma usuária encontrada ainda"
+          description="Crie a conta dela em Authentication > Users no Supabase para começar a gerenciar mimos e créditos."
+        />
+      )}
+
+      {!isLoading && primaryUser && (
+        <>
+          <AdminTabs active={tab} onChange={setTab} pendingCount={pendingCount} />
+
+          {tab === 'overview' && <OverviewTab userId={primaryUser.id} />}
+          {tab === 'credits' && <CreditsTab userId={primaryUser.id} />}
+          {tab === 'treats' && <TreatsTab userId={primaryUser.id} />}
+          {tab === 'requests' && <RequestsTab />}
+        </>
+      )}
     </div>
   )
 }

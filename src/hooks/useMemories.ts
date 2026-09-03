@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchRedemptionHistory } from '@/services/historyService'
-import type { RedemptionWithTreat } from '@/types/domain'
+import { fetchMemories } from '@/services/historyService'
+import type { MemoryEntry } from '@/types/domain'
 
-export function useRedemptionHistory(userId: string | undefined) {
-  const [entries, setEntries] = useState<RedemptionWithTreat[]>([])
+export function useMemories(userId: string | undefined) {
+  const [entries, setEntries] = useState<MemoryEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   const reload = useCallback(async () => {
     if (!userId) return
     setIsLoading(true)
-    setEntries(await fetchRedemptionHistory(userId))
+    setEntries(await fetchMemories(userId))
     setIsLoading(false)
   }, [userId])
 

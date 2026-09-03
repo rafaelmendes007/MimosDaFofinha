@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
-import type { RedemptionWithTreat } from '@/types/domain'
+import type { CustomRequestRow } from '@/types/database'
+import type { MemoryEntry, RedemptionWithTreat } from '@/types/domain'
 
 interface HistoryRow {
   id: string
@@ -36,4 +37,45 @@ export async function fetchRedemptionHistory(userId: string): Promise<Redemption
       note: row.note,
       treat: row.treat as { id: string; name: string; icon: string; description: string },
     }))
+}
+
+/**
+ * Memórias de verdade: resgates do catálogo + pedidos especiais aprovados,
+ * unificados numa única linha do tempo (mais recente primeiro).
+ */
+export async function fetchMemories(userId: string): Promise<MemoryEntry[]> {
+  const redemptions = await fetchRedemptionHistory(userId)
+
+  const { data: approvedRequests, error } = await supabase
+    .from('custom_requests')
+    .select('id, message, approved_cost_credits, admin_note, resolved_at')
+    .eq('user_id', userId)
+    .eq('status', 'approved')
+    .returns<
+      Pick<CustomRequestRow, 'id' | 'message' | 'approved_cost_credits' | 'admin_note' | 'resolved_at'>[]
+    >()
+
+  if (error) {
+    console.error('Erro ao buscar pedidos aprovados para memórias:', error.message)
+  }
+
+  const fromRedemptions: MemoryEntry[] = redemptions.map((entry) => ({
+    id: `redemption-${entry.id}`,
+    icon: entry.treat.icon,
+    title: entry.treat.name,
+    description: entry.treat.description,
+    costCredits: entry.costCredits,
+    date: entry.redeemedAt,
+  }))
+
+  const fromRequests: MemoryEntry[] = (approvedRequests ?? []).map((row) => ({
+    id: `request-${row.id}`,
+    icon: '✨',
+    title: row.message,
+    description: row.admin_note ?? 'Pedido especial aprovado.',
+    costCredits: row.approved_cost_credits ?? 0,
+    date: row.resolved_at ?? '',
+  }))
+
+  return [...fromRedemptions, ...fromRequests].sort((a, b) => b.date.localeCompare(a.date))
 }

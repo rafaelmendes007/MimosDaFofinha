@@ -118,6 +118,19 @@ export interface Database {
         Args: { p_treat_id: string }
         Returns: { redemption_id: string; new_balance: number }[]
       }
+      admin_grant_credits: {
+        Args: { p_user_id: string; p_amount: number; p_note: string | null }
+        Returns: number
+      }
+      admin_resolve_custom_request: {
+        Args: {
+          p_request_id: string
+          p_decision: 'approved' | 'rejected'
+          p_cost_credits: number | null
+          p_note: string | null
+        }
+        Returns: void
+      }
     }
     Enums: {
       user_role: UserRoleRow

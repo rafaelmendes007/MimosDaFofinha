@@ -38,6 +38,19 @@ export interface RedemptionWithTreat extends Redemption {
   treat: Pick<Treat, 'id' | 'name' | 'icon' | 'description'>
 }
 
+/**
+ * Um item da linha do tempo de Memórias — pode vir de um resgate do
+ * catálogo ou de um pedido especial aprovado, unificados visualmente.
+ */
+export interface MemoryEntry {
+  id: string
+  icon: string
+  title: string
+  description: string
+  costCredits: number
+  date: string
+}
+
 export type CreditTransactionReason =
   | 'grant'
   | 'redemption'
