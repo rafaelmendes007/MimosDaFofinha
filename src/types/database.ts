@@ -95,6 +95,10 @@ export interface Database {
         Args: { uid: string }
         Returns: boolean
       }
+      redeem_treat: {
+        Args: { p_treat_id: string }
+        Returns: { redemption_id: string; new_balance: number }[]
+      }
     }
     Enums: {
       user_role: UserRoleRow

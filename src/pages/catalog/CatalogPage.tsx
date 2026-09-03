@@ -1,15 +1,56 @@
 import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Heart, PartyPopper } from 'lucide-react'
 import { Badge, Button, Card, CardDescription, CardTitle, EmptyState, Modal, Spinner } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTreats } from '@/hooks/useTreats'
+import { useCreditBalance } from '@/hooks/useCreditBalance'
 import { useRedemptionCounts } from '@/hooks/useRedemptionCounts'
+import { InsufficientCreditsError, redeemTreat } from '@/services/redemptionService'
+import { pickSuccessMessage } from '@/utils/redeemMessages'
+import { fireCelebration } from '@/utils/confetti'
 import type { Treat } from '@/types/domain'
+
+type ModalStatus = 'confirm' | 'insufficient' | 'redeeming' | 'success' | 'error'
 
 export function CatalogPage() {
   const { profile } = useAuth()
   const { treats, isLoading } = useTreats()
-  const counts = useRedemptionCounts(profile?.id)
+  const { balance, reload: reloadBalance } = useCreditBalance(profile?.id)
+  const { counts, increment: incrementCount } = useRedemptionCounts(profile?.id)
+
   const [selectedTreat, setSelectedTreat] = useState<Treat | null>(null)
+  const [status, setStatus] = useState<ModalStatus>('confirm')
+  const [successMessage, setSuccessMessage] = useState('')
+
+  function openRedeem(treat: Treat) {
+    setSelectedTreat(treat)
+    setStatus(balance < treat.costCredits ? 'insufficient' : 'confirm')
+  }
+
+  function closeModal() {
+    setSelectedTreat(null)
+  }
+
+  async function handleConfirm() {
+    if (!selectedTreat) return
+    setStatus('redeeming')
+    try {
+      await redeemTreat(selectedTreat.id)
+      setSuccessMessage(pickSuccessMessage())
+      setStatus('success')
+      incrementCount(selectedTreat.id)
+      void reloadBalance()
+      fireCelebration()
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) {
+        setStatus('insufficient')
+      } else {
+        console.error('Erro ao resgatar mimo:', error)
+        setStatus('error')
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -52,7 +93,7 @@ export function CatalogPage() {
                       ? 'Ainda não vivemos isso'
                       : `Já aproveitado ${redeemedCount}x`}
                   </span>
-                  <Button size="md" onClick={() => setSelectedTreat(treat)}>
+                  <Button size="md" onClick={() => openRedeem(treat)}>
                     Resgatar
                   </Button>
                 </div>
@@ -62,27 +103,101 @@ export function CatalogPage() {
         </div>
       )}
 
-      <Modal open={!!selectedTreat} onClose={() => setSelectedTreat(null)}>
+      <Modal open={!!selectedTreat} onClose={closeModal}>
         {selectedTreat && (
-          <div className="space-y-4 text-center">
-            <span className="text-4xl">{selectedTreat.icon}</span>
-            <div>
-              <p className="font-display text-xl font-semibold text-cream-100">
-                {selectedTreat.name}
-              </p>
-              <p className="mt-1 text-sm text-cream-300">{selectedTreat.description}</p>
-            </div>
-            <Badge tone="gold" className="mx-auto">
-              {selectedTreat.costCredits}{' '}
-              {selectedTreat.costCredits === 1 ? 'crédito' : 'créditos'}
-            </Badge>
-            <p className="text-xs text-cream-400">
-              O resgate de verdade — com desconto de créditos e a comemoração — chega na Etapa 5.
-            </p>
-            <Button className="w-full" onClick={() => setSelectedTreat(null)}>
-              Fechar
-            </Button>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={status}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4 text-center"
+            >
+              {(status === 'confirm' || status === 'redeeming') && (
+                <>
+                  <span className="text-4xl">{selectedTreat.icon}</span>
+                  <div>
+                    <p className="font-display text-xl font-semibold text-cream-100">
+                      {selectedTreat.name}
+                    </p>
+                    <p className="mt-1 text-sm text-cream-300">{selectedTreat.description}</p>
+                  </div>
+                  <Badge tone="gold" className="mx-auto">
+                    {selectedTreat.costCredits}{' '}
+                    {selectedTreat.costCredits === 1 ? 'crédito' : 'créditos'}
+                  </Badge>
+                  <p className="text-xs text-cream-400">Confirma o resgate desse mimo?</p>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onClick={closeModal}
+                      disabled={status === 'redeeming'}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={handleConfirm}
+                      disabled={status === 'redeeming'}
+                    >
+                      {status === 'redeeming' ? <Spinner /> : 'Confirmar'}
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {status === 'success' && (
+                <>
+                  <PartyPopper className="mx-auto size-9 text-gold-300" />
+                  <p className="font-display text-xl font-semibold text-cream-100">
+                    {successMessage}
+                  </p>
+                  <Button className="w-full" onClick={closeModal}>
+                    Fechar
+                  </Button>
+                </>
+              )}
+
+              {status === 'insufficient' && (
+                <>
+                  <span className="text-4xl">🥺</span>
+                  <p className="font-display text-lg font-semibold text-cream-100">
+                    Ops... seus créditos acabaram.
+                  </p>
+                  <p className="text-sm text-cream-300">
+                    O patrocinador oficial do amor foi informado.
+                    <br />
+                    Aguarde uma nova liberação de créditos. <Heart className="inline size-3.5 text-blush-400" fill="currentColor" />
+                  </p>
+                  <Button className="w-full" onClick={closeModal}>
+                    Entendi
+                  </Button>
+                </>
+              )}
+
+              {status === 'error' && (
+                <>
+                  <span className="text-4xl">💔</span>
+                  <p className="font-display text-lg font-semibold text-cream-100">
+                    Algo não deu certo
+                  </p>
+                  <p className="text-sm text-cream-300">
+                    Não consegui concluir o resgate agora. Tenta de novo em instantes?
+                  </p>
+                  <div className="flex gap-3">
+                    <Button variant="secondary" className="flex-1" onClick={closeModal}>
+                      Fechar
+                    </Button>
+                    <Button className="flex-1" onClick={handleConfirm}>
+                      Tentar de novo
+                    </Button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
         )}
       </Modal>
     </div>
