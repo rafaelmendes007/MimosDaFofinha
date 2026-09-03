@@ -1,12 +1,13 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BackgroundGlow, Button } from '@/components/ui'
+import { useAuth } from '@/contexts/AuthContext'
+import { completeOnboarding } from '@/services/profileService'
 
 /**
  * Carta de boas-vindas. Edite o texto abaixo livremente — é o único lugar
  * que precisa mudar para personalizar a mensagem completa.
- * A lógica de "mostrar só no primeiro acesso" será conectada na Etapa 4,
- * junto com o restante do fluxo de onboarding e o Supabase.
  */
 const LETTER_TITLE = 'Feliz 3 anos, Fofinha'
 const LETTER_BODY = `Três anos atrás a nossa história começou, e de lá pra cá cada dia ao seu
@@ -19,6 +20,24 @@ daqui a mais três anos a gente esteja lembrando de tudo isso com o
 coração cheio.`
 
 export function OnboardingPage() {
+  const { profile, refreshProfile } = useAuth()
+  const navigate = useNavigate()
+  const [isEntering, setIsEntering] = useState(false)
+
+  if (profile?.onboardingCompletedAt) {
+    return <Navigate to="/" replace />
+  }
+
+  async function handleEnter() {
+    setIsEntering(true)
+    try {
+      await completeOnboarding()
+      await refreshProfile()
+    } finally {
+      navigate('/', { replace: true })
+    }
+  }
+
   return (
     <div className="flex min-h-svh flex-col items-center justify-center px-6 py-16">
       <BackgroundGlow />
@@ -34,11 +53,9 @@ export function OnboardingPage() {
         </h1>
         <p className="mt-6 text-pretty whitespace-pre-line text-cream-300">{LETTER_BODY}</p>
 
-        <Link to="/" className="mt-10 inline-block">
-          <Button size="lg" className="px-10">
-            Entrar no aplicativo
-          </Button>
-        </Link>
+        <Button size="lg" className="mt-10 px-10" onClick={handleEnter} disabled={isEntering}>
+          {isEntering ? 'Entrando...' : 'Entrar no aplicativo'}
+        </Button>
       </motion.div>
     </div>
   )

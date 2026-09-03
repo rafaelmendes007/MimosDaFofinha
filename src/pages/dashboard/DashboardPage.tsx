@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Gift, History, Sparkles } from 'lucide-react'
 import { Card, CardTitle, CardDescription, CreditBalance } from '@/components/ui'
+import { useAuth } from '@/contexts/AuthContext'
 
 /** Dados de exemplo — a Etapa 4 conecta isso ao Supabase. */
 const SAMPLE_CREDITS = 5
@@ -28,11 +29,14 @@ const quickLinks = [
 ]
 
 export function DashboardPage() {
+  const { profile } = useAuth()
+  const firstName = profile?.displayName?.split(' ')[0] || 'Fofinha'
+
   return (
     <div className="space-y-6">
       <div>
         <p className="text-sm text-cream-400">Que bom te ver por aqui</p>
-        <h1 className="font-display text-2xl font-semibold text-cream-100">Olá, Fofinha 👋</h1>
+        <h1 className="font-display text-2xl font-semibold text-cream-100">Olá, {firstName} 👋</h1>
       </div>
 
       <CreditBalance credits={SAMPLE_CREDITS} />

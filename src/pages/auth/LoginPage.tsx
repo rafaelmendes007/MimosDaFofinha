@@ -1,8 +1,41 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BackgroundGlow, Button, Card, Input } from '@/components/ui'
 import { Logo } from '@/components/layout/Logo'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function LoginPage() {
+  const { session, isLoading, signIn } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  if (!isLoading && session) {
+    const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/'
+    return <Navigate to={from} replace />
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+
+    const { error: signInError } = await signIn(email, password)
+
+    setIsSubmitting(false)
+    if (signInError) {
+      setError(signInError)
+      return
+    }
+    navigate('/', { replace: true })
+  }
+
   return (
     <div className="flex min-h-svh flex-col items-center justify-center px-6 py-12">
       <BackgroundGlow />
@@ -17,15 +50,35 @@ export function LoginPage() {
           <p className="text-sm text-cream-400">Entre para ver seus mimos ✨</p>
         </div>
 
-        <Card className="space-y-4">
-          <Input type="email" label="E-mail" placeholder="voce@exemplo.com" autoComplete="email" />
-          <Input type="password" label="Senha" placeholder="••••••••" autoComplete="current-password" />
-          <Button className="w-full" size="lg">
-            Entrar
-          </Button>
-          <p className="text-center text-xs text-cream-400">
-            Autenticação via Supabase será conectada na Etapa 3.
-          </p>
+        <Card>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <Input
+              type="email"
+              label="E-mail"
+              placeholder="voce@exemplo.com"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+            <Input
+              type="password"
+              label="Senha"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            {error && (
+              <p role="alert" className="text-sm text-wine-300">
+                {error}
+              </p>
+            )}
+            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+              {isSubmitting ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
         </Card>
       </motion.div>
     </div>

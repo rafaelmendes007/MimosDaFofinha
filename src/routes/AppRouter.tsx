@@ -7,22 +7,28 @@ import { HistoryPage } from '@/pages/history/HistoryPage'
 import { RequestsPage } from '@/pages/requests/RequestsPage'
 import { AdminPage } from '@/pages/admin/AdminPage'
 import { AppShell } from '@/components/layout/AppShell'
+import { RequireAuth } from './RequireAuth'
+import { RequireAdmin } from './RequireAdmin'
 
-/**
- * Rotas do app. Proteção por autenticação/role (usuária vs. administrador)
- * será adicionada na Etapa 3, junto com o AuthContext e as regras de RLS.
- */
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
-  { path: '/onboarding', element: <OnboardingPage /> },
   {
-    element: <AppShell />,
+    element: <RequireAuth />,
     children: [
-      { path: '/', element: <DashboardPage /> },
-      { path: '/mimos', element: <CatalogPage /> },
-      { path: '/memorias', element: <HistoryPage /> },
-      { path: '/pedido-especial', element: <RequestsPage /> },
-      { path: '/admin', element: <AdminPage /> },
+      { path: '/onboarding', element: <OnboardingPage /> },
+      {
+        element: <AppShell />,
+        children: [
+          { path: '/', element: <DashboardPage /> },
+          { path: '/mimos', element: <CatalogPage /> },
+          { path: '/memorias', element: <HistoryPage /> },
+          { path: '/pedido-especial', element: <RequestsPage /> },
+          {
+            element: <RequireAdmin />,
+            children: [{ path: '/admin', element: <AdminPage /> }],
+          },
+        ],
+      },
     ],
   },
 ])

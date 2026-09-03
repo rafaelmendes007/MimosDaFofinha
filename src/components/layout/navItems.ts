@@ -8,9 +8,8 @@ export interface NavItem {
 }
 
 /**
- * Itens de navegação principal. O item "Admin" hoje aparece para todo mundo —
- * na Etapa 3, quando o AuthContext e as roles existirem, ele passa a ser
- * exibido somente para o perfil administrador.
+ * Itens de navegação principal. O item "Admin" (adminNavItem) é adicionado
+ * condicionalmente pela TopNav/BottomNav, somente quando `isAdmin` é true.
  */
 export const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: Heart },
