@@ -8,6 +8,7 @@ export type CreditTransactionReasonRow =
   | 'redemption'
   | 'adjustment'
   | 'custom_request_approved'
+export type CustomRequestStatusRow = 'pending' | 'approved' | 'rejected'
 
 export interface ProfileRow {
   id: string
@@ -48,6 +49,18 @@ export interface RedemptionRow {
   redeemed_at: string
 }
 
+export interface CustomRequestRow {
+  id: string
+  user_id: string
+  message: string
+  status: CustomRequestStatusRow
+  approved_cost_credits: number | null
+  admin_note: string | null
+  created_at: string
+  resolved_at: string | null
+  resolved_by: string | null
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -82,6 +95,12 @@ export interface Database {
           cost_credits: number
         }
         Update: Partial<RedemptionRow>
+        Relationships: []
+      }
+      custom_requests: {
+        Row: CustomRequestRow
+        Insert: Partial<CustomRequestRow> & { user_id: string; message: string }
+        Update: Partial<CustomRequestRow>
         Relationships: []
       }
     }
