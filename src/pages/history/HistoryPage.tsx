@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { History as HistoryIcon } from 'lucide-react'
 import { Badge, Card, CardDescription, EmptyState, Spinner } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
@@ -35,8 +36,14 @@ export function HistoryPage() {
 
       {!isLoading && entries.length > 0 && (
         <div className="relative space-y-5 border-l border-ink-600 pl-6">
-          {entries.map((entry) => (
-            <div key={entry.id} className="relative">
+          {entries.map((entry, index) => (
+            <motion.div
+              key={entry.id}
+              className="relative"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: Math.min(index * 0.06, 0.36), ease: 'easeOut' }}
+            >
               <span className="absolute top-5 -left-[29px] size-3 rounded-full border-2 border-ink-950 bg-gold-400" />
               <Card>
                 <div className="flex items-start gap-3">
@@ -55,7 +62,7 @@ export function HistoryPage() {
                   </div>
                 </div>
               </Card>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

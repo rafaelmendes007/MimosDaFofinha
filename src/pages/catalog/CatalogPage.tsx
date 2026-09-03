@@ -75,29 +75,36 @@ export function CatalogPage() {
 
       {!isLoading && treats.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {treats.map((treat) => {
+          {treats.map((treat, index) => {
             const redeemedCount = counts[treat.id] ?? 0
             return (
-              <Card key={treat.id} className="flex flex-col">
-                <div className="flex items-start justify-between">
-                  <span className="text-3xl">{treat.icon}</span>
-                  <Badge tone="gold">
-                    {treat.costCredits} {treat.costCredits === 1 ? 'crédito' : 'créditos'}
-                  </Badge>
-                </div>
-                <CardTitle className="mt-3">{treat.name}</CardTitle>
-                <CardDescription className="mt-1 flex-1">{treat.description}</CardDescription>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs text-cream-400">
-                    {redeemedCount === 0
-                      ? 'Ainda não vivemos isso'
-                      : `Já aproveitado ${redeemedCount}x`}
-                  </span>
-                  <Button size="md" onClick={() => openRedeem(treat)}>
-                    Resgatar
-                  </Button>
-                </div>
-              </Card>
+              <motion.div
+                key={treat.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.3), ease: 'easeOut' }}
+              >
+                <Card className="flex h-full flex-col">
+                  <div className="flex items-start justify-between">
+                    <span className="text-3xl">{treat.icon}</span>
+                    <Badge tone="gold">
+                      {treat.costCredits} {treat.costCredits === 1 ? 'crédito' : 'créditos'}
+                    </Badge>
+                  </div>
+                  <CardTitle className="mt-3">{treat.name}</CardTitle>
+                  <CardDescription className="mt-1 flex-1">{treat.description}</CardDescription>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-xs text-cream-400">
+                      {redeemedCount === 0
+                        ? 'Ainda não vivemos isso'
+                        : `Já aproveitado ${redeemedCount}x`}
+                    </span>
+                    <Button size="md" onClick={() => openRedeem(treat)}>
+                      Resgatar
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
             )
           })}
         </div>

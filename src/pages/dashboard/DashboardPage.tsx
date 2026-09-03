@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Gift, History, Sparkles } from 'lucide-react'
 import { Card, CardTitle, CardDescription, CreditBalance } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
@@ -37,14 +38,21 @@ export function DashboardPage() {
       <CreditBalance credits={balance} />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        {quickLinks.map(({ to, icon: Icon, title, description }) => (
-          <Link key={to} to={to}>
-            <Card className="h-full transition-colors hover:border-gold-500/40">
-              <Icon className="size-5 text-gold-300" />
-              <CardTitle className="mt-3 text-base">{title}</CardTitle>
-              <CardDescription className="mt-1">{description}</CardDescription>
-            </Card>
-          </Link>
+        {quickLinks.map(({ to, icon: Icon, title, description }, index) => (
+          <motion.div
+            key={to}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.1 + index * 0.06, ease: 'easeOut' }}
+          >
+            <Link to={to}>
+              <Card className="h-full transition-colors hover:border-gold-500/40">
+                <Icon className="size-5 text-gold-300" />
+                <CardTitle className="mt-3 text-base">{title}</CardTitle>
+                <CardDescription className="mt-1">{description}</CardDescription>
+              </Card>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </div>
