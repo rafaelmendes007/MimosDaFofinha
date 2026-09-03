@@ -2,35 +2,30 @@ import { Link } from 'react-router-dom'
 import { Gift, History, Sparkles } from 'lucide-react'
 import { Card, CardTitle, CardDescription, CreditBalance } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
-
-/** Dados de exemplo — a Etapa 4 conecta isso ao Supabase. */
-const SAMPLE_CREDITS = 5
-const SAMPLE_TREAT_COUNT = 7
-
-const quickLinks = [
-  {
-    to: '/mimos',
-    icon: Gift,
-    title: 'Ver mimos',
-    description: `${SAMPLE_TREAT_COUNT} mimos esperando por você`,
-  },
-  {
-    to: '/memorias',
-    icon: History,
-    title: 'Memórias',
-    description: 'Reviva o que já vivemos juntos',
-  },
-  {
-    to: '/pedido-especial',
-    icon: Sparkles,
-    title: 'Pedido especial',
-    description: 'Peça algo que não está no catálogo',
-  },
-]
+import { useCreditBalance } from '@/hooks/useCreditBalance'
+import { useTreats } from '@/hooks/useTreats'
 
 export function DashboardPage() {
   const { profile } = useAuth()
+  const { balance } = useCreditBalance(profile?.id)
+  const { treats } = useTreats()
+
   const firstName = profile?.displayName?.split(' ')[0] || 'Fofinha'
+  const treatCountLabel =
+    treats.length === 0
+      ? 'Nenhum mimo cadastrado ainda'
+      : `${treats.length} ${treats.length === 1 ? 'mimo esperando' : 'mimos esperando'} por você`
+
+  const quickLinks = [
+    { to: '/mimos', icon: Gift, title: 'Ver mimos', description: treatCountLabel },
+    { to: '/memorias', icon: History, title: 'Memórias', description: 'Reviva o que já vivemos juntos' },
+    {
+      to: '/pedido-especial',
+      icon: Sparkles,
+      title: 'Pedido especial',
+      description: 'Peça algo que não está no catálogo',
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -39,7 +34,7 @@ export function DashboardPage() {
         <h1 className="font-display text-2xl font-semibold text-cream-100">Olá, {firstName} 👋</h1>
       </div>
 
-      <CreditBalance credits={SAMPLE_CREDITS} />
+      <CreditBalance credits={balance} />
 
       <div className="grid gap-3 sm:grid-cols-3">
         {quickLinks.map(({ to, icon: Icon, title, description }) => (
