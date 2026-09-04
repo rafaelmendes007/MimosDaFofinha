@@ -174,7 +174,7 @@ export function CatalogPage() {
                     Ops... seus créditos acabaram.
                   </p>
                   <p className="text-sm text-cream-300">
-                    O patrocinador oficial do amor foi informado.
+                    O Fofinho foi informado.
                     <br />
                     Aguarde uma nova liberação de créditos. <Heart className="inline size-3.5 text-blush-400" fill="currentColor" />
                   </p>
